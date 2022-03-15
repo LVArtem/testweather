@@ -10,83 +10,68 @@ class WeatherList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //С помощью BlocBuilder перестраиваем интерфейс, когда генерируется новое состояние
     return BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state) {
-      if (state is EmptyState) {
-        return const Center(
-          child: Text(
-            'No data received',
-            style: TextStyle(fontSize: 20.0),
-          ),
-        );
-      }
-
+      //Если сгенерировано состояние LoadingState, возвращаем индикатор загрузки
       if (state is LoadingState) {
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator());
       }
-
+      //Если сгенерировано состояние LoadedState возвращаем данные полученные данные о погоде
       if (state is LoadedDailyState) {
-        print(state.loadedWeather[1].temp + ' °C');
-        print(state.loadedWeather[2].temp + ' °C');
-        print(state.loadedWeather[3].temp + ' °C');
-        return ListView.builder(
-          itemCount: 3,
-          itemBuilder: (context, index) => Card(
-            elevation: 20,
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-            child: ListTile(
-              tileColor: const Color(0xff22417a),
-              leading: Column(
-                children: [
-                  Text(
-                    state.loadedWeather[index + 1].temp + ' °C',
-                    style: const TextStyle(fontSize: 15),
+        return FutureBuilder(builder:
+            (BuildContext context, AsyncSnapshot<dynamic> loadedWeather) {
+          state.loadedWeather.sort((a, b) => a.temp.compareTo(
+              b.temp)); //Сортируем список по температуре от меньшего к большему
+          return ListView.builder(
+            //Задаем кол-во отображаемых элементов
+            itemCount: 3,
+            itemBuilder: (context, index) => Card(
+              elevation: 20,
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+              //ListView заполняется виджетами ListTile
+              child: ListTile(
+                tileColor: Colors.blue[300],
+                leading: Column(
+                  children: [
+                    Text(
+                      state.loadedWeather[index].temp.toString() + ' °C',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Text(
+                      state.loadedWeather[index].humidity + ' %',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Text(
+                      state.loadedWeather[index].speed + 'м/с',
+                      style: const TextStyle(fontSize: 15),
+                    )
+                  ],
+                ),
+                //Получаем название дня недели
+                title: DayOfWeek(
+                    weekday: (DateTime.fromMillisecondsSinceEpoch(
+                            state.loadedWeather[index].data * 1000)
+                        .weekday)),
+                //Получаем дату
+                subtitle: Text(
+                  DateFormat('dd/MM').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          state.loadedWeather[index].data * 1000)),
+                  style: const TextStyle(
+                    fontSize: 17,
                   ),
-                  Text(
-                    state.loadedWeather[index + 1].humidity + ' %',
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                  Text(
-                    state.loadedWeather[index + 1].speed + 'м/с',
-                    style: const TextStyle(fontSize: 15),
-                  )
-                ],
-              ),
-              title: DayOfWeek(
-                  weekday: (DateTime.fromMillisecondsSinceEpoch(
-                          state.loadedWeather[index + 1].data * 1000)
-                      .weekday)),
-              subtitle: Text(
-                DateFormat('dd/MM').format(DateTime.fromMillisecondsSinceEpoch(
-                    state.loadedWeather[index + 1].data * 1000)),
-                style: const TextStyle(
-                  fontSize: 17,
+                ),
+                //Получаем погодую иконку
+                trailing: Image.network(
+                  'http://openweathermap.org/img/wn/${state.loadedWeather[index].icon}@2x.png',
                 ),
               ),
-              trailing: Image.network(
-                'http://openweathermap.org/img/wn/${state.loadedWeather[index + 1].icon}@2x.png',
-              ),
             ),
-          ),
-        );
+          );
+        });
       } else {
-        return const Text('No data');
+        return const Center(child: Text('Ошибка получения данных'));
       }
     });
   }
 }
-
-// class SortList extends StatelessWidget {
-//   const SortList({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocBuilder(
-//       builder: (context, state) {
-//         if (state is LoadedDailyState) {
-//           if (state.loadedWeather[1].temp < state.loadedWeather[2].temp < state.loadedWeather[3].temp)
-//         }
-//         return Container();
-//       },
-//     );
-//   }
-// }

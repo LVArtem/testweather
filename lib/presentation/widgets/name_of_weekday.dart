@@ -1,3 +1,4 @@
+//Возвращаем название дня недели в зависимости от номера дня
 import 'package:flutter/material.dart';
 
 class DayOfWeek extends StatelessWidget {
@@ -9,15 +10,20 @@ class DayOfWeek extends StatelessWidget {
     return Text((() {
       if (weekday == 1) {
         return "Понедельник";
-      } else if (weekday == 2) {
+      }
+      if (weekday == 2) {
         return "Вторник";
-      } else if (weekday == 3) {
+      }
+      if (weekday == 3) {
         return "Среда";
-      } else if (weekday == 4) {
+      }
+      if (weekday == 4) {
         return "Четверг";
-      } else if (weekday == 5) {
+      }
+      if (weekday == 5) {
         return "Пятница";
-      } else if (weekday == 6) {
+      }
+      if (weekday == 6) {
         return "Суббота";
       } else {
         return "Воскресенье";
